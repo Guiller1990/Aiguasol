@@ -1,1 +1,117 @@
-joñnljn
+import requests
+import json
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy import fftpack
+from scipy.fft import fft, fftfreq
+
+
+auth_token='0c9631a2b62294b6fb1fff4807b228ab2fd0e55c6e3790d052d003aaf6a83b9d'
+accept='application/json; application/vnd.esios-api-v1+json'
+content='application/json'
+host= 'api.esios.ree.es'
+header = {'Accept':accept,'Content-Type':content,'Host': host,'Authorization':'Token token='+ auth_token}
+
+#url demanda real cada 10 minutos
+url = 'https://api.esios.ree.es/indicators/1293?vis=1&start_date=02-09-2018T00%3A00&end_date=06-10-2018T23%3A50&compare_start_date=01-09-2018T00%3A00&groupby=minutes10'
+
+response = requests.get(url,headers=header)
+
+#Extracción valores de consumo MW cada 10 minutos
+datos_json = json.loads(response.text)
+valores=datos_json["indicator"]["values"]
+for x in range(0,len(valores)):
+    valores[x]=(valores[x]['value'])
+
+
+#Consumo MW por horas
+h = 6
+valores_hora = [sum(valores[i:i+h])//h for i in range(0,len(valores),h)]
+
+#Consumo MW por dias
+d = 24
+valores_dia = [sum(valores_hora[i:i+d])//d for i in range(0,len(valores_hora),d)]
+
+#vector tiempo 10 minutos
+vector_tiempo_min=np.linspace(0, len(valores)*10, len(valores))
+
+#vector tiempo horas
+vector_tiempo_hora=np.arange(1,len(valores_hora)+1,1)
+
+#vector tiempo dias
+vector_tiempo_dias=np.arange(1,len(valores_dia)+1,1)
+
+#tamaño 10 min
+N_min=len(valores)
+#tamaño hora
+N_hora=len(valores_hora)
+#tamaño dias
+N_dia=len(valores_dia)
+
+#fft 10m
+señal_min=fftpack.fft(valores)
+señal_min=np.abs(señal_min)
+time_step_min=600
+frecuencia_min = fftpack.fftfreq(len(señal_min),time_step_min)
+
+#fft horas
+señal_hora=fftpack.fft(valores_hora)
+señal_hora=np.abs(señal_hora)
+time_step_hora=3600
+frecuencia_hora = fftpack.fftfreq(len(señal_hora), time_step_hora)
+
+#fft dias
+señal_dia=fftpack.fft(valores_dia)
+señal_dia=np.abs(señal_dia)
+time_step_dia=24*3600
+frecuencia_dia = fftpack.fftfreq(len(señal_dia), 1)
+
+
+#plot minutos
+
+fig, (ax1, ax2) = plt.subplots(2, 1)
+plt.suptitle('Gráficas Demanda Real por minutos (02/09/2018-06/10/2018)')
+ax1.plot(vector_tiempo_min,valores)
+ax1.set_ylabel('Demanda real (MW)')
+ax1.set_title('MW por minuto',loc='right', color ='blue')
+ax1.grid(axis='y')
+ax1.set_xlabel('Tiempo (m)')
+
+ax2.plot(frecuencia_min[1:],señal_min[1:],'r--')
+ax2.set_ylabel('Amplitud')
+ax2.set_xlabel('Frecuencia (Hz)')
+ax2.set_title('FFT', loc= 'right', color='red')
+ax2.grid(axis='y')
+
+#plots horas
+fig, (ax1, ax2) = plt.subplots(2, 1)
+plt.suptitle('Gráficas Demanda Real por horas (02/09/2018-06/10/2018)')
+ax1.plot(vector_tiempo_hora,valores_hora)
+ax1.set_ylabel('Demanda real (MW)')
+ax1.set_title('MW por hora', loc='right', color ='blue')
+ax1.set_xlabel('Tiempo (h)')
+ax1.grid(axis='y')
+
+ax2.plot(frecuencia_hora[1:],señal_hora[1:],'r--')
+ax2.set_ylabel('Amplitud')
+ax2.set_xlabel('Frecuencia (Hz)')
+ax2.set_title('FFT', loc='right',color='red')
+ax2.grid(axis='y')
+
+
+#plot dia
+
+fig, (ax1, ax2) = plt.subplots(2, 1)
+plt.suptitle('Gráficas Demanda Real por días (02/09/2018-06/10/2018)')
+ax1.plot(vector_tiempo_dias,valores_dia)
+ax1.set_title('MW por dia',loc='right', color ='blue')
+ax1.set_ylabel('Demanda real (MW)')
+ax1.set_xlabel('Tiempo (Días)')
+ax1.grid(axis='y')
+
+ax2.plot(frecuencia_dia[1:],señal_dia[1:],'r--')
+ax2.set_ylabel('Amplitud')
+ax2.set_xlabel('Frecuencia (Hz)')
+ax2.set_title('FFT', loc='right',color='red')
+ax2.grid(axis='y')
+plt.show()
