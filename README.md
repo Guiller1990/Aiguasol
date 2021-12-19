@@ -8,4 +8,4 @@ Para la fft es tan sencillo como meter la señal, los valores por minutos u hora
 Para la función de freq se mete el timestep, en este caso lo he convertido a segundos, para obtener Herzios. 
 Todas las gráficas tienen FFTs iguales, la de minutos al tener más datos es más difícil de discernir cuando se repiten las ondulaciones o dicho de otro modo, las repeticiones en la señal para determinadas frecuencias que marca la amplitud.
 A través de la frecuencia se podría sacar el período, y ver cuando la señal se repite en formato tiempo, sobre todo para aquellas con una señal más grande.
-Decir que en las gráficas FFT se ha eliminado la primera señal, la cual correspondía al mínimo de frecuencia porque la amplitud era demasiado grande para poder ver el resto. 
+Decir que en las gráficas FFT se ha eliminado la primera señal, la cual correspondía al mínimo de frecuencia porque la amplitud era demasiado grande para poder valorar el resto de amplitudes.
