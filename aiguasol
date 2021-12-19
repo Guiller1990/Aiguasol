@@ -81,6 +81,7 @@ ax2.plot(frecuencia_min[1:],señal_min[1:],'r--')
 ax2.set_ylabel('Amplitud')
 ax2.set_xlabel('Frecuencia (Hz)')
 ax2.set_title('FFT', loc= 'right', color='red')
+ax2.set_xlim([-0.00025, 0.00025])
 ax2.grid(axis='y')
 
 #plots horas
